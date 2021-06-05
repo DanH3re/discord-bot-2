@@ -1,7 +1,12 @@
-const Discord = require('discord.js')
+const Discord = require('discord.js');
+const { search } = require('yt-search');
 const client = new Discord.Client({ partials: ['USER', 'GUILD_MEMBER', 'CHANNEL', 'MESSAGE', 'REACTION'] });
-var prefix = '/'
+var prefix = 'h/'
 const token = 'ODUwMDYwNDQ0MDY4MjE2ODcy.YLkOew._jK3eRq_YL-_-DZCg5M_impIZIY';
+const queue = new Map();
+const ytdl = require('ytdl-core');
+const ytSearch = require('yt-search');
+
 client.login(token);
 client.on('ready', () => {
     console.log('Bot ON');
@@ -66,6 +71,7 @@ client.on("message", async message => {
     };
 
     if(command === 'm'){
+      deletemessage()
       message = "";
       for(i = 1; i < args.length; i++) {
         message = message + " " + args[i]
@@ -74,4 +80,95 @@ client.on("message", async message => {
 
   };
 
+  const server_queue = queue.get(message.guild.id);
+  if(command === 'play'){
+  deletemessage()
+  const voiceChannel = message.member.voice.channel;
+  if(!voiceChannel) return message.channel.send('<:error:850726590660476928> **Вы должны быть в голосовом канале чтобы использовать эту команду!**');
+  const voicePerms = voiceChannel.permissionsFor(message.client.user);
+  if(!voicePerms.has('CONNECT')) return message.channel.send('<:error:850726590660476928> **У вас нет прав чтобы использовать данную команду!**');
+  if(!voicePerms.has('SPEAK')) return message.channel.send('<:error:850726590660476928> **У вас нет прав чтобы использовать данную команду!**');
+  if(!args.length) return message.channel.send('<:error:850726590660476928> **Введите название или ссылку на видео!**');
+  let song = {};
+
+  if(ytdl.validateURL(args[0])) {
+    const songInfo = await ytdl.getInfo(args[0]);
+    song = {title: songInfo.videoDetails.title, author: songInfo.videoDetails.author, url: songInfo.videoDetails.video_url}
+  } else {
+    const videoFinder = async (query) => {
+      const videoResult = await ytSearch(query);
+      return(videoResult.videos.length > 1) ? videoResult.videos[0]: null;
+    }
+    const video = await videoFinder(args.join(' '))
+    if(video) {
+      song = {title: video.title, author: video.author, url: video.url}
+    } else {
+      message.channel.send('<:error:850726590660476928> **Видео не найдено.**');
+    }
+  }
+
+if(!server_queue) {
+  const queueConstructor = {
+    voice_channel: voiceChannel,
+    text_channel: message.channel,
+    connection: null,
+    songs: []
+  };
+  queue.set(message.guild.id, queueConstructor)
+  queueConstructor.songs.push(song)
+
+  try {
+    const connection = await voiceChannel.join();
+    queueConstructor.connection = connection;
+    videoPlayer(message.guild, queueConstructor.songs[0])
+  } catch(err) {
+    queue.delete(message.guild.id)
+    message.channel.send('<:error:850726590660476928> **Ошибка при подключении.**');
+    console.log(err);
+  } 
+} else {
+  server_queue.songs.push(song);
+  message.channel.send(`<:queue:850726004297302046> **Песня __${song.title}__ добавлена в очередь на __${server_queue.songs.length}__ месте.**`);
+}
+
+} else if(command === 'stop'){
+    deletemessage()
+    stopSong(message, server_queue)
+} else if(command === 'skip'){
+    deletemessage()
+    skipSong(message, server_queue)
+  };
+
 });
+
+const videoPlayer = async (guild, song) => {
+  const song_queue = queue.get(guild.id);
+    if (!song) {
+        song_queue.voice_channel.leave();
+        song_queue.text_channel.send(`<:queue:850726004297302046> **Очередь музыки закончилась.**`);
+        queue.delete(guild.id);
+        return;
+    }
+    const stream = ytdl(song.url, { filter: 'audioonly' });
+    song_queue.connection.play(stream, { seek: 0, volume: 0.5 })
+    .on('finish', () => {
+        song_queue.songs.shift();
+        videoPlayer(guild, song_queue.songs[0]);
+    });
+    await song_queue.text_channel.send(`<:music:850726004078149672> **Ебашу песню под названием - __${song.title}__**`);
+}
+
+const skipSong = (message, server_queue) => {
+  if(!message.member.voice.channel) return message.channel.send('<:error:850726590660476928> **Вы должны быть в голосовом канале чтобы использовать эту команду!**');
+  if(!server_queue) return message.channel.send('<:error:850726590660476928> **Ничего не было добавлено в очередь.**');
+  message.channel.send(`**<:skip:850730256712466433> Переключаюсь на следующею композицию.**`);
+  server_queue.connection.dispatcher.end();
+}
+
+const stopSong = (message, server_queue) => {
+  if(!message.member.voice.channel) return message.channel.send('<:error:850726590660476928> **Вы должны быть в голосовом канале чтобы использовать эту команду!**');
+  if(!server_queue) return message.channel.send('<:error:850726590660476928> **Ничего не было добавлено в очередь.**');
+  message.channel.send(`**<:stop:850730472333508608> Остановил проигравание всех песен.**`);
+  server_queue.song = [];
+  server_queue.connection.dispatcher.end();
+}
