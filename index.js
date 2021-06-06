@@ -6,6 +6,8 @@ const token = 'ODUwMDYwNDQ0MDY4MjE2ODcy.YLkOew._jK3eRq_YL-_-DZCg5M_impIZIY';
 const queue = new Map();
 const ytdl = require('ytdl-core');
 const ytSearch = require('yt-search');
+var imgList = new Array('https://cdn.discordapp.com/attachments/715429319639433289/769930775297523772/Grand_Theft_Auto_V_Screenshot_2020.10.25_-_17.27.30.52.png')
+var randomizeColor = 'off';
 
 client.login(token);
 client.on('ready', () => {
@@ -14,24 +16,49 @@ client.on('ready', () => {
 });
 
 client.on('guildMemberAdd', member => {
-  member.guild.channels.cache.get("697855703423123526").send({
-    "content": `${member}`,
-    "embed": 
-      {
-        "description": "**:performing_arts: Тут вы можете ознакомится с правилами:**\n<#675858836976041984>\n\n**:question: Если вам не выдают роль или есть вопрос пишите в ЛС:**\n<@631115972102586388>\n\n**:busts_in_silhouette: По вопросам вступления:**\n<@287910554129924097>",
-        "color": 336699,
-        "author": {
-          "name": "Discord Family Hennessy",
-          "icon_url": "https://sun9-25.userapi.com/impf/TcU6sW5Y-tLOg-gXrbm1wGMFfxbOQgABUyizdw/tMeb8GZ_Rc8.jpg?size=2000x2000&quality=96&sign=1022d5c58b94bdc065e79608a6d483b4&type=album"
-        },
-        "image": {
-          "url": "https://cdn.discordapp.com/attachments/715429319639433289/769930775297523772/Grand_Theft_Auto_V_Screenshot_2020.10.25_-_17.27.30.52.png"
-        },
-        "thumbnail": {
-          "url": "https://sun9-25.userapi.com/impf/TcU6sW5Y-tLOg-gXrbm1wGMFfxbOQgABUyizdw/tMeb8GZ_Rc8.jpg?size=2000x2000&quality=96&sign=1022d5c58b94bdc065e79608a6d483b4&type=album"
+  var image = imgList[Math.floor(Math.random() * imgList.length)];
+  if(randomizeColor === 'off') {
+    member.guild.channels.cache.get("697855703423123526").send({
+      "content": `${member}`,
+      "embed": 
+        {
+          "description": "**:performing_arts: Тут вы можете ознакомится с правилами:**\n<#675858836976041984>\n\n**:question: Если вам не выдают роль или есть вопрос пишите в ЛС:**\n<@631115972102586388>\n\n**:busts_in_silhouette: По вопросам вступления:**\n<@287910554129924097>",
+          "color": 336699,
+          "author": {
+            "name": "Discord Family Hennessy",
+            "icon_url": "https://sun9-25.userapi.com/impf/TcU6sW5Y-tLOg-gXrbm1wGMFfxbOQgABUyizdw/tMeb8GZ_Rc8.jpg?size=2000x2000&quality=96&sign=1022d5c58b94bdc065e79608a6d483b4&type=album"
+          },
+          "image": {
+            "url": `${image}`
+          },
+          "thumbnail": {
+            "url": "https://sun9-25.userapi.com/impf/TcU6sW5Y-tLOg-gXrbm1wGMFfxbOQgABUyizdw/tMeb8GZ_Rc8.jpg?size=2000x2000&quality=96&sign=1022d5c58b94bdc065e79608a6d483b4&type=album"
+          }
         }
-      }
-  })
+    })
+  } else {
+    color = getRandomNumber(100000, 999999);
+    member.guild.channels.cache.get("697855703423123526").send({
+      "content": `${member}`,
+      "embed": 
+        {
+          "description": "**:performing_arts: Тут вы можете ознакомится с правилами:**\n<#675858836976041984>\n\n**:question: Если вам не выдают роль или есть вопрос пишите в ЛС:**\n<@631115972102586388>\n\n**:busts_in_silhouette: По вопросам вступления:**\n<@287910554129924097>",
+          "color": `${color}`,
+          "author": {
+            "name": "Discord Family Hennessy",
+            "icon_url": "https://sun9-25.userapi.com/impf/TcU6sW5Y-tLOg-gXrbm1wGMFfxbOQgABUyizdw/tMeb8GZ_Rc8.jpg?size=2000x2000&quality=96&sign=1022d5c58b94bdc065e79608a6d483b4&type=album"
+          },
+          "image": {
+            "url": `${image}`
+          },
+          "thumbnail": {
+            "url": "https://sun9-25.userapi.com/impf/TcU6sW5Y-tLOg-gXrbm1wGMFfxbOQgABUyizdw/tMeb8GZ_Rc8.jpg?size=2000x2000&quality=96&sign=1022d5c58b94bdc065e79608a6d483b4&type=album"
+          }
+        }
+    })
+
+  }
+
 
 });
 
@@ -72,6 +99,7 @@ client.on("message", async message => {
 
     if(command === 'm'){
       deletemessage()
+      isAdmin(message.member);
       message = "";
       for(i = 1; i < args.length; i++) {
         message = message + " " + args[i]
@@ -139,6 +167,57 @@ if(!server_queue) {
     skipSong(message, server_queue)
   };
 
+if(command === 'd'){
+    isAdmin(message.member);
+    message.delete();
+    message.channel.bulkDelete(args[0]).catch(error => console.log(error.stack))
+    console.log(`Cleared ${args[0]} messages.`)
+}
+
+if(command === 'addimg'){
+  isAdmin(message.member);
+  deletemessage()
+if(!args[0]) return message.channel.send('<:error:850726590660476928> **Недостаточно аргументов!**');
+if(args.length > 1) {
+for(i = 0; i < args.length; i++) {
+  imgList.push(args[i])
+  message.channel.send(`<:checkmark:850726004649099264> **Картина ${i+1} добавлена в рандомайзер!**`)
+}
+} else if(args.length = 1) {
+  imgList.push(args[0])
+  message.channel.send('<:checkmark:850726004649099264> **Картина добавлена в рандомайзер!**')
+}
+}
+
+if(command === 'saveimg') {
+  isAdmin(message.member);
+  deletemessage();
+  var message = "https://cdn.discordapp.com/attachments/715429319639433289/769930775297523772/Grand_Theft_Auto_V_Screenshot_2020.10.25_-_17.27.30.52.png";
+  if(imgList.length > 1) {
+    for(i = 1; i < imgList.length; i++) {
+      message = message + " " + imgList[i]
+    }
+    console.log(message);
+  }
+}
+
+if(command === 'rc') {
+  isAdmin(message.member);
+  deletemessage();
+  if(!args[0]) return message.channel.send('<:error:850726590660476928> **Недостаточно аргументов!**');
+  if(args.length > 1) return message.channel.send('<:error:850726590660476928> **Слишком много аргументов!**')
+  if(args[0] === "on") {
+    randomizeColor = "on";
+    message.channel.send('<:checkmark:850726004649099264> **Рандомайзер цвета включен!**')
+  } else if (args[0] === "off") {
+    message.channel.send('<:checkmark:850726004649099264> **Рандомайзер цвета выключен!**')
+    randomizeColor = "off";
+  } else {
+    message.channel.send('<:error:850726590660476928> **Неправильные аргументы!**')
+  }
+}
+
+
 });
 
 const videoPlayer = async (guild, song) => {
@@ -171,4 +250,12 @@ const stopSong = (message, server_queue) => {
   message.channel.send(`**<:stop:850730472333508608> Остановил проигравание всех песен.**`);
   server_queue.song = [];
   server_queue.connection.dispatcher.end();
+}
+
+function isAdmin(user) {
+  if(!user.hasPermission('ADMINISTRATOR')) return message.channel.send("<:error:850726590660476928> **У вас недостаточно прав!**")
+}
+
+function getRandomNumber(min,max){
+  return Math.floor(Math.random()*(max-min+1)+min);
 }
