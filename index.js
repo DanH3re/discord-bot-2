@@ -173,7 +173,7 @@ if(command === 'd'){
     if(!args[0]) {
       message.channel.send({
           "embed": {
-              "title": ":no_entry_sign: Ошибка",
+              "title": "<:error:850726590660476928> Ошибка",
               "description": "Недостаточно аргументов.",
               "color": 16711680
           }
@@ -191,7 +191,13 @@ if(command === 'd'){
           })
       }
   });
-  
+    message.channel.send({
+        "embed": {
+            "title": "Успешно <:checkmark:850726004649099264>",
+            "description": `Удалил ${args[0]} сообщении.`,
+            "color": 7601920
+        }
+    })
   } else if(args[0]<=500) {
       var deletedMessages = 0;
       message.channel.bulkDelete(100).catch(error => {
@@ -214,7 +220,7 @@ if(command === 'd'){
               message.channel.send({
                   "embed": {
                       "title": "Успешно <:checkmark:850726004649099264>",
-                      "description": `Удалил ${deletedMessages} сообщении.`,
+                      "description": `Удалил ${args[0]} сообщении.`,
                       "color": 7601920
                   }
               })
@@ -226,8 +232,8 @@ if(command === 'd'){
   } else {
       message.channel.send({
           "embed": {
-              "title": "<:error:850726590660476928> Error",
-              "description": "Enter a number beetwen 0 and 500.",
+              "title": "<:error:850726590660476928> Ошибка",
+              "description": "Введите номер от 0 до 500",
               "color": 16711680
           }
       })
