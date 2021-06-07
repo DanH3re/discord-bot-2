@@ -170,26 +170,68 @@ if(!server_queue) {
 if(command === 'd'){
     isAdmin(message.member);
     message.delete();
-if(!args[0]) {
-    message.channel.send({
-        "embed": {
-            "title": "<:error:850726590660476928> Ошибка",
-            "description": "Недостаточно аргументов.",
-            "color": 16711680
-        }
-    })
-} else if(args[0]<=100) {
-message.channel.bulkDelete(args[0]).catch(error => {
-	if (error.code !== 0) {
-        var errorDescription = 'Что то пошло не так.\n\n' + '```' + error + '```'
-        message.channel.send({
-            "embed": {
-                "title": "<:error:850726590660476928> Ошибка",
-                "description": errorDescription,
-                "color": 16711680
-            }
-        })
-    }
+    if(!args[0]) {
+      message.channel.send({
+          "embed": {
+              "title": ":no_entry_sign: Ошибка",
+              "description": "Недостаточно аргументов.",
+              "color": 16711680
+          }
+      })
+  } else if(args[0]<=100) {
+  message.channel.bulkDelete(args[0]).catch(error => {
+    if (error.code !== 0) {
+          var errorDescription = 'Что то пошло не так.\n\n' + '```' + error + '```'
+          message.channel.send({
+              "embed": {
+                  "title": "<:error:850726590660476928> Ошибка",
+                  "description": errorDescription,
+                  "color": 16711680
+              }
+          })
+      }
+  });
+  
+  } else if(args[0]<=500) {
+      var deletedMessages = 0;
+      message.channel.bulkDelete(100).catch(error => {
+          // Only log the error if it is not an Unknown Message error
+          if (error.code !== 0) {
+              var errorDescription = 'Что то пошло не так.\n\n' + '```' + error + '```'
+              message.channel.send({
+                  "embed": {
+                      "title": "<:error:850726590660476928> Ошибка",
+                      "description": errorDescription,
+                      "color": 16711680
+                  }
+              })
+          } else {
+              for (var i = 100; i < args[0];) {
+                  i = i + 100;
+                  message.channel.bulkDelete(100)
+                  deletedMessages = deletedMessages + 100;
+              }
+              message.channel.send({
+                  "embed": {
+                      "title": "Успешно <:checkmark:850726004649099264>",
+                      "description": `Удалил ${deletedMessages} сообщении.`,
+                      "color": 7601920
+                  }
+              })
+          }
+      });
+  
+      
+  
+  } else {
+      message.channel.send({
+          "embed": {
+              "title": "<:error:850726590660476928> Error",
+              "description": "Enter a number beetwen 0 and 500.",
+              "color": 16711680
+          }
+      })
+  }
 }
 
 if(command === 'addimg'){
