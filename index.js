@@ -170,8 +170,26 @@ if(!server_queue) {
 if(command === 'd'){
     isAdmin(message.member);
     message.delete();
-    message.channel.bulkDelete(args[0]).catch(error => console.log(error.stack))
-    console.log(`Cleared ${args[0]} messages.`)
+if(!args[0]) {
+    message.channel.send({
+        "embed": {
+            "title": "<:error:850726590660476928> Ошибка",
+            "description": "Недостаточно аргументов.",
+            "color": 16711680
+        }
+    })
+} else if(args[0]<=100) {
+message.channel.bulkDelete(args[0]).catch(error => {
+	if (error.code !== 0) {
+        var errorDescription = 'Что то пошло не так.\n\n' + '```' + error + '```'
+        message.channel.send({
+            "embed": {
+                "title": "<:error:850726590660476928> Ошибка",
+                "description": errorDescription,
+                "color": 16711680
+            }
+        })
+    }
 }
 
 if(command === 'addimg'){
