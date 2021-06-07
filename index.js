@@ -233,7 +233,7 @@ if(command === 'd'){
       message.channel.send({
           "embed": {
               "title": "<:error:850726590660476928> Ошибка",
-              "description": "Введите номер от 0 до 500",
+              "description": "Введите номер от 0 до 500.",
               "color": 16711680
           }
       })
